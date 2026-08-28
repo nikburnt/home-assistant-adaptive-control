@@ -1,0 +1,13 @@
+{
+  "entity": {
+    "switch": {
+      "verbose_logging": {
+        "default": "mdi:bug-outline",
+        "state": {
+          "off": "mdi:bug-outline",
+          "on": "mdi:bug"
+        }
+      }
+    }
+  }
+}

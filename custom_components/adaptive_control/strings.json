@@ -1,0 +1,15 @@
+{
+  "title": "Adaptive Control",
+  "config": {
+    "abort": {
+      "no_controller_types": "No Controller Types are available yet."
+    }
+  },
+  "entity": {
+    "switch": {
+      "verbose_logging": {
+        "name": "Verbose logging"
+      }
+    }
+  }
+}

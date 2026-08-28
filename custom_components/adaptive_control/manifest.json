@@ -1,0 +1,11 @@
+{
+  "domain": "adaptive_control",
+  "name": "Adaptive Control",
+  "codeowners": ["@nikburnt"],
+  "documentation": "https://github.com/nikburnt/home-assistant-adaptive-control",
+  "integration_type": "helper",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/nikburnt/home-assistant-adaptive-control/issues",
+  "requirements": [],
+  "version": "0.0.1"
+}
