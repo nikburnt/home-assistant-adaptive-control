@@ -1,8 +1,12 @@
 {
   "title": "Adaptive Control",
   "config": {
-    "user": {},
-    "step": {},
+    "step": {
+      "user": {
+        "title": "Adaptive Control",
+        "description": "No Controller Types are available yet."
+      }
+    },
     "abort": {
       "no_controller_types": "No Controller Types are available yet."
     }
