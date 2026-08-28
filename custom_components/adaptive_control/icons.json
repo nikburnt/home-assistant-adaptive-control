@@ -1,6 +1,32 @@
 {
   "entity": {
+    "event": {
+      "decision": {
+        "default": "mdi:source-branch"
+      }
+    },
+    "sensor": {
+      "effective_profile": {
+        "default": "mdi:state-machine"
+      },
+      "occupancy_quality": {
+        "default": "mdi:motion-sensor"
+      },
+      "illuminance_quality": {
+        "default": "mdi:brightness-6"
+      },
+      "night_quality": {
+        "default": "mdi:weather-night"
+      }
+    },
     "switch": {
+      "enabled": {
+        "default": "mdi:play-circle-outline",
+        "state": {
+          "off": "mdi:pause-circle-outline",
+          "on": "mdi:play-circle"
+        }
+      },
       "verbose_logging": {
         "default": "mdi:bug-outline",
         "state": {

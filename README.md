@@ -7,18 +7,34 @@ state, and diagnostics beyond a collection of unrelated automations.
 
 ## Current status
 
-The repository currently contains the shared runtime and observability
-foundation:
+The repository contains the shared runtime and the first Controller Type,
+**Presence Lighting**:
 
 - typed Controller and Signal Provider entry kinds;
 - one bounded in-memory decision trace per config entry;
 - credentials-free config-entry diagnostics;
-- a restorable per-entry **Verbose logging** configuration switch;
+- restorable per-entry **Enabled** and **Verbose logging** switches;
+- effective-profile and input-quality sensors;
+- a semantic decision event;
+- UI setup and reconfiguration for explicit entity bindings;
 - HACS, Hassfest, Ruff, and Home Assistant test configuration.
 
-No Controller Types are exposed through the Home Assistant UI yet. The first
-configuration flow will ship with the first concrete Controller Type so every
-created entry has valid input roles, policy, and owned actuators.
+Presence Lighting uses occupancy, the Home Assistant sun state, and an
+illuminance snapshot taken when occupancy starts. It owns one stateful main
+light actuator and activates profile transition scenes once per real profile
+change.
+
+| Effective profile | Main light | Transition scene |
+| --- | --- | --- |
+| `vacant` | Off | Vacant scene |
+| `occupied_bright` | Off | Occupied scene |
+| `occupied_dark` | On | Occupied scene |
+| `occupied_night` | Off | Night occupied scene |
+
+The controller starts disabled on first installation. Missing occupancy, sun,
+or required daytime illuminance produces `input_unavailable` and preserves
+current outputs instead of guessing. A valid vacancy remains safe to process
+without the other signals.
 
 ## Model
 
@@ -34,9 +50,18 @@ and diagnostics contract is described in
 
 ## Installation
 
-This initial foundation is not yet intended for installation on a production
-Home Assistant instance. HACS metadata is present so validation and release
-packaging remain part of development from the beginning.
+Add this repository to HACS as a custom integration repository, install
+**Adaptive Control**, and restart Home Assistant. Add the integration and bind:
+
+- one occupancy binary sensor;
+- one illuminance sensor;
+- `sun.sun` as the night-state signal;
+- one main `light` or `switch` actuator;
+- occupied, night-occupied, and vacant scenes;
+- an optional Home Assistant Area and the low-light threshold.
+
+Review the created logical device, then turn on **Enabled**. The controller does
+not issue actuator or scene commands before that switch is enabled.
 
 ## Development
 

@@ -3,18 +3,104 @@
   "config": {
     "step": {
       "user": {
-        "title": "Adaptive Control",
-        "description": "No Controller Types are available yet."
+        "title": "Presence lighting",
+        "description": "Create an independent controller that selects a lighting profile from occupancy, daylight, and illuminance.",
+        "data": {
+          "name": "Name",
+          "occupancy_entity_id": "Occupancy",
+          "illuminance_entity_id": "Illuminance",
+          "night_entity_id": "Night state",
+          "main_light_entity_id": "Main light",
+          "day_scene_entity_id": "Occupied scene",
+          "night_scene_entity_id": "Night occupied scene",
+          "vacant_scene_entity_id": "Vacant scene",
+          "illuminance_threshold": "Low-light threshold",
+          "area_id": "Area"
+        },
+        "data_description": {
+          "main_light_entity_id": "The stateful light or switch exclusively owned by this controller.",
+          "day_scene_entity_id": "Activated once when either occupied daytime profile becomes effective.",
+          "night_scene_entity_id": "Activated once when occupied at night.",
+          "vacant_scene_entity_id": "Activated once after occupancy becomes off.",
+          "illuminance_threshold": "The main light is enabled at or below this illuminance while occupied during daytime."
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure presence lighting",
+        "description": "Update explicit signal, actuator, and transition-action bindings.",
+        "data": {
+          "name": "Name",
+          "occupancy_entity_id": "Occupancy",
+          "illuminance_entity_id": "Illuminance",
+          "night_entity_id": "Night state",
+          "main_light_entity_id": "Main light",
+          "day_scene_entity_id": "Occupied scene",
+          "night_scene_entity_id": "Night occupied scene",
+          "vacant_scene_entity_id": "Vacant scene",
+          "illuminance_threshold": "Low-light threshold",
+          "area_id": "Area"
+        }
       }
     },
+    "error": {
+      "actuator_already_owned": "This actuator is already owned by another Adaptive Control controller."
+    },
     "abort": {
-      "no_controller_types": "No Controller Types are available yet."
+      "reconfigure_successful": "Presence lighting was reconfigured."
     }
   },
   "entity": {
     "switch": {
+      "enabled": {
+        "name": "Enabled"
+      },
       "verbose_logging": {
         "name": "Verbose logging"
+      }
+    },
+    "sensor": {
+      "effective_profile": {
+        "name": "Effective profile",
+        "state": {
+          "disabled": "Disabled",
+          "input_unavailable": "Input unavailable",
+          "vacant": "Vacant",
+          "occupied_bright": "Occupied, bright",
+          "occupied_dark": "Occupied, dark",
+          "occupied_night": "Occupied, night"
+        }
+      },
+      "occupancy_quality": {
+        "name": "Occupancy quality",
+        "state": {
+          "valid": "Valid",
+          "unavailable": "Unavailable",
+          "invalid": "Invalid",
+          "stale": "Stale"
+        }
+      },
+      "illuminance_quality": {
+        "name": "Illuminance quality",
+        "state": {
+          "valid": "Valid",
+          "unavailable": "Unavailable",
+          "invalid": "Invalid",
+          "stale": "Stale"
+        }
+      },
+      "night_quality": {
+        "name": "Night quality",
+        "state": {
+          "valid": "Valid",
+          "unavailable": "Unavailable",
+          "invalid": "Invalid",
+          "stale": "Stale"
+        }
+      }
+    },
+    "event": {
+      "decision": {
+        "name": "Decision"
       }
     }
   }

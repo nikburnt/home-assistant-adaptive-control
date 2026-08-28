@@ -12,6 +12,10 @@ Each logical device includes:
 - a semantic event entity for meaningful decisions and transitions;
 - a `Verbose Logging` configuration switch.
 
+Controller entries also expose a restorable `Enabled` switch. It is off when a
+controller is first installed, and disabling it preserves current actuator
+state rather than issuing an implicit shutdown command.
+
 `Verbose Logging` is off by default and its state is restored after a Home
 Assistant restart. When it is on, detailed messages for only that Controller or
 Signal Provider are promoted to the normal Home Assistant log. The switch does

@@ -17,7 +17,52 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Set up configuration switches for one runtime entry."""
-    async_add_entities([AdaptiveVerboseLoggingSwitch(entry, entry.runtime_data)])
+    async_add_entities(
+        [
+            AdaptiveEnabledSwitch(entry, entry.runtime_data),
+            AdaptiveVerboseLoggingSwitch(entry, entry.runtime_data),
+        ]
+    )
+
+
+class AdaptiveEnabledSwitch(SwitchEntity, RestoreEntity):
+    """Enable automatic behavior for one Adaptive Control entry."""
+
+    _attr_has_entity_name = True
+    _attr_should_poll = False
+    _attr_translation_key = "enabled"
+
+    def __init__(
+        self,
+        entry: ConfigEntry,
+        runtime: AdaptiveRuntime,
+    ) -> None:
+        """Initialize the enabled switch."""
+        self._attr_unique_id = f"{entry.entry_id}_enabled"
+        self._attr_device_info = entry_device_info(entry, runtime)
+        self._runtime = runtime
+
+    @property
+    def is_on(self) -> bool:
+        """Return whether automatic control is enabled."""
+        return self._runtime.enabled
+
+    async def async_added_to_hass(self) -> None:
+        """Restore the setting and subscribe to runtime updates."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            self._runtime.async_add_listener(self.async_write_ha_state)
+        )
+        if (last_state := await self.async_get_last_state()) is not None:
+            await self._runtime.async_set_enabled(last_state.state == STATE_ON)
+
+    async def async_turn_on(self, **kwargs) -> None:
+        """Enable automatic control."""
+        await self._runtime.async_set_enabled(True)
+
+    async def async_turn_off(self, **kwargs) -> None:
+        """Disable automatic control without changing actuators."""
+        await self._runtime.async_set_enabled(False)
 
 
 class AdaptiveVerboseLoggingSwitch(SwitchEntity, RestoreEntity):

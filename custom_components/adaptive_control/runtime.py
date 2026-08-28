@@ -12,7 +12,12 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.util import dt as dt_util
 
-from .const import CONF_ENTRY_KIND, CONF_TYPE_ID, MAX_DECISION_TRACE
+from .const import (
+    CONF_ENTRY_KIND,
+    CONF_TYPE_ID,
+    MAX_DECISION_TRACE,
+    TYPE_PRESENCE_LIGHTING,
+)
 from .models import Decision, EntryKind
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,6 +37,7 @@ class AdaptiveRuntime:
         self._listeners: set[Listener] = set()
         self._decision_trace: deque[Decision] = deque(maxlen=MAX_DECISION_TRACE)
         self._verbose_logging_enabled = False
+        self._enabled = False
 
     async def async_start(self) -> None:
         """Start the runtime foundation."""
@@ -76,6 +82,26 @@ class AdaptiveRuntime:
         )
         self._notify_listeners()
 
+    @property
+    def enabled(self) -> bool:
+        """Return whether this runtime may apply automatic behavior."""
+        return self._enabled
+
+    async def async_set_enabled(self, enabled: bool) -> None:
+        """Enable or disable automatic behavior for this entry."""
+        if self._enabled == enabled:
+            return
+        self._enabled = enabled
+        self.record_decision(
+            "controller_enabled" if enabled else "controller_disabled",
+            "user_control",
+        )
+        await self.async_enabled_changed()
+        self._notify_listeners()
+
+    async def async_enabled_changed(self) -> None:
+        """Apply type-specific behavior after the enabled state changes."""
+
     def _log_verbose(self, message: str, *args: Any) -> None:
         """Log details at INFO only when this entry opts in."""
         log = _LOGGER.info if self._verbose_logging_enabled else _LOGGER.debug
@@ -112,11 +138,26 @@ class AdaptiveRuntime:
         """Return the bounded decision trace in chronological order."""
         return tuple(self._decision_trace)
 
+    @property
+    def latest_decision(self) -> Decision | None:
+        """Return the newest decision for the semantic event entity."""
+        return self._decision_trace[-1] if self._decision_trace else None
+
     def diagnostics(self) -> dict[str, Any]:
         """Return credentials-free common runtime diagnostics."""
         return {
             "entry_kind": self.kind,
             "type_id": self.type_id,
+            "enabled": self._enabled,
             "verbose_logging_enabled": self._verbose_logging_enabled,
             "decision_trace": [decision.as_dict() for decision in self._decision_trace],
         }
+
+
+def create_runtime(hass: HomeAssistant, entry: ConfigEntry) -> AdaptiveRuntime:
+    """Create the runtime implemented by one typed config entry."""
+    if entry.data[CONF_TYPE_ID] == TYPE_PRESENCE_LIGHTING:
+        from .presence_lighting import PresenceLightingRuntime
+
+        return PresenceLightingRuntime(hass, entry)
+    return AdaptiveRuntime(hass, entry)
