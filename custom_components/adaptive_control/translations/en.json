@@ -18,6 +18,7 @@
           "area_id": "Area"
         },
         "data_description": {
+          "night_entity_id": "A sun entity or an on/off context entity that is on only during the true night mode.",
           "main_light_entity_id": "The stateful light or switch exclusively owned by this controller.",
           "day_scene_entity_id": "Activated once when either occupied daytime profile becomes effective.",
           "night_scene_entity_id": "Activated once when occupied at night.",
@@ -39,6 +40,9 @@
           "vacant_scene_entity_id": "Vacant scene",
           "illuminance_threshold": "Low-light threshold",
           "area_id": "Area"
+        },
+        "data_description": {
+          "night_entity_id": "A sun entity or an on/off context entity that is on only during the true night mode."
         }
       }
     },

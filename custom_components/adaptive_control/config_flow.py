@@ -125,7 +125,11 @@ class AdaptiveControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 CONF_NIGHT_ENTITY_ID,
                 defaults,
                 "sun.sun",
-            ): EntitySelector(EntitySelectorConfig(domain="sun")),
+            ): EntitySelector(
+                EntitySelectorConfig(
+                    domain=["sun", "input_boolean", "binary_sensor", "schedule"]
+                )
+            ),
             _required(
                 CONF_MAIN_LIGHT_ENTITY_ID,
                 defaults,

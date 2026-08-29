@@ -35,13 +35,17 @@ from custom_components.adaptive_control.presence_lighting import (
 OCCUPANCY = "binary_sensor.bathroom_occupancy"
 ILLUMINANCE = "sensor.bathroom_illuminance"
 NIGHT = "sun.sun"
+NIGHT_MODE = "input_boolean.night_mode"
 MAIN_LIGHT = "switch.bathroom_main"
 DAY_SCENE = "scene.bathroom_day"
 NIGHT_SCENE = "scene.bathroom_night"
 VACANT_SCENE = "scene.bathroom_off"
 
 
-def make_runtime(hass: HomeAssistant) -> PresenceLightingRuntime:
+def make_runtime(
+    hass: HomeAssistant,
+    night_entity_id: str = NIGHT,
+) -> PresenceLightingRuntime:
     """Create one Presence Lighting runtime."""
     entry = MockConfigEntry(
         domain="adaptive_control",
@@ -52,7 +56,7 @@ def make_runtime(hass: HomeAssistant) -> PresenceLightingRuntime:
             CONF_TYPE_ID: TYPE_PRESENCE_LIGHTING,
             CONF_OCCUPANCY_ENTITY_ID: OCCUPANCY,
             CONF_ILLUMINANCE_ENTITY_ID: ILLUMINANCE,
-            CONF_NIGHT_ENTITY_ID: NIGHT,
+            CONF_NIGHT_ENTITY_ID: night_entity_id,
             CONF_MAIN_LIGHT_ENTITY_ID: MAIN_LIGHT,
             CONF_DAY_SCENE_ENTITY_ID: DAY_SCENE,
             CONF_NIGHT_SCENE_ENTITY_ID: NIGHT_SCENE,
@@ -146,6 +150,39 @@ async def test_night_profile_does_not_require_illuminance(
 
     assert runtime.effective_profile is PresenceLightingProfile.OCCUPIED_NIGHT
     assert calls == [
+        (Platform.SWITCH, SERVICE_TURN_OFF, MAIN_LIGHT),
+        (Platform.SCENE, SERVICE_TURN_ON, NIGHT_SCENE),
+    ]
+    await runtime.async_stop()
+
+
+async def test_external_night_mode_separates_dark_evening_from_night(
+    hass: HomeAssistant,
+) -> None:
+    """A dark evening uses the main light until the night context turns on."""
+    calls = register_services(hass)
+    hass.states.async_set(OCCUPANCY, STATE_ON)
+    hass.states.async_set(ILLUMINANCE, "1")
+    hass.states.async_set(NIGHT_MODE, STATE_OFF)
+    hass.states.async_set(MAIN_LIGHT, STATE_OFF)
+    hass.states.async_set(DAY_SCENE, "unknown")
+    hass.states.async_set(NIGHT_SCENE, "unknown")
+    runtime = make_runtime(hass, NIGHT_MODE)
+    await runtime.async_start()
+
+    await runtime.async_set_enabled(True)
+
+    assert runtime.effective_profile is PresenceLightingProfile.OCCUPIED_DARK
+    assert calls == [
+        (Platform.SWITCH, SERVICE_TURN_ON, MAIN_LIGHT),
+        (Platform.SCENE, SERVICE_TURN_ON, DAY_SCENE),
+    ]
+
+    hass.states.async_set(NIGHT_MODE, STATE_ON)
+    await hass.async_block_till_done()
+
+    assert runtime.effective_profile is PresenceLightingProfile.OCCUPIED_NIGHT
+    assert calls[-2:] == [
         (Platform.SWITCH, SERVICE_TURN_OFF, MAIN_LIGHT),
         (Platform.SCENE, SERVICE_TURN_ON, NIGHT_SCENE),
     ]

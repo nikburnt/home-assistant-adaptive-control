@@ -19,10 +19,11 @@ The repository contains the shared runtime and the first Controller Type,
 - UI setup and reconfiguration for explicit entity bindings;
 - HACS, Hassfest, Ruff, and Home Assistant test configuration.
 
-Presence Lighting uses occupancy, the Home Assistant sun state, and an
-illuminance snapshot taken when occupancy starts. It owns one stateful main
-light actuator and activates profile transition scenes once per real profile
-change.
+Presence Lighting uses occupancy, an explicit night-state entity, and an
+illuminance snapshot taken when occupancy starts. The night state can be
+`sun.sun` or a reusable on/off context such as an `input_boolean`, binary
+sensor, or schedule. It owns one stateful main-light actuator and activates
+profile transition scenes once per real profile change.
 
 | Effective profile | Main light | Transition scene |
 | --- | --- | --- |
@@ -31,10 +32,10 @@ change.
 | `occupied_dark` | On | Occupied scene |
 | `occupied_night` | Off | Night occupied scene |
 
-The controller starts disabled on first installation. Missing occupancy, sun,
-or required daytime illuminance produces `input_unavailable` and preserves
-current outputs instead of guessing. A valid vacancy remains safe to process
-without the other signals.
+The controller starts disabled on first installation. Missing occupancy,
+night state, or required daytime illuminance produces `input_unavailable` and
+preserves current outputs instead of guessing. A valid vacancy remains safe to
+process without the other signals.
 
 ## Model
 
@@ -55,7 +56,7 @@ Add this repository to HACS as a custom integration repository, install
 
 - one occupancy binary sensor;
 - one illuminance sensor;
-- `sun.sun` as the night-state signal;
+- `sun.sun` or an on/off helper as the night-state signal;
 - one main `light` or `switch` actuator;
 - occupied, night-occupied, and vacant scenes;
 - an optional Home Assistant Area and the low-light threshold.

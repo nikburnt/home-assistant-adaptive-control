@@ -197,13 +197,17 @@ class PresenceLightingRuntime(AdaptiveRuntime):
         return None, SignalQuality.INVALID
 
     def _read_night(self) -> tuple[bool | None, SignalQuality]:
-        """Read the standard Home Assistant sun state."""
+        """Read a sun state or a reusable on/off night context."""
         state = self.hass.states.get(self.night_entity_id)
         if state is None or state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
             return None, SignalQuality.UNAVAILABLE
         if state.state == "below_horizon":
             return True, SignalQuality.VALID
         if state.state == "above_horizon":
+            return False, SignalQuality.VALID
+        if state.state == STATE_ON:
+            return True, SignalQuality.VALID
+        if state.state == STATE_OFF:
             return False, SignalQuality.VALID
         return None, SignalQuality.INVALID
 
