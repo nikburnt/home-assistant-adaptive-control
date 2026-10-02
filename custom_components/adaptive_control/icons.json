@@ -5,6 +5,11 @@
         "default": "mdi:source-branch"
       }
     },
+    "number": {
+      "illuminance_threshold": {
+        "default": "mdi:brightness-6"
+      }
+    },
     "sensor": {
       "effective_profile": {
         "default": "mdi:state-machine"

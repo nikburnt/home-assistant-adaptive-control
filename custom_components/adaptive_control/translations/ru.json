@@ -54,6 +54,11 @@
     }
   },
   "entity": {
+    "number": {
+      "illuminance_threshold": {
+        "name": "Порог низкой освещённости"
+      }
+    },
     "switch": {
       "enabled": {
         "name": "Включено"

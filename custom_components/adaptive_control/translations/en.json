@@ -54,6 +54,11 @@
     }
   },
   "entity": {
+    "number": {
+      "illuminance_threshold": {
+        "name": "Low-light threshold"
+      }
+    },
     "switch": {
       "enabled": {
         "name": "Enabled"

@@ -110,6 +110,21 @@ class PresenceLightingRuntime(AdaptiveRuntime):
         """Re-evaluate immediately after the user enables or disables control."""
         await self.async_evaluate("enabled_changed")
 
+    async def async_set_illuminance_threshold(self, value: float) -> None:
+        """Update the low-light threshold and re-evaluate the entry snapshot."""
+        value = float(value)
+        if self.illuminance_threshold == value:
+            return
+        self.illuminance_threshold = value
+        if self._entry_illuminance is not None:
+            self._occupied_day_profile = (
+                PresenceLightingProfile.OCCUPIED_DARK
+                if self._entry_illuminance <= value
+                else PresenceLightingProfile.OCCUPIED_BRIGHT
+            )
+        await self.async_evaluate("illuminance_threshold_changed")
+        self._notify_listeners()
+
     @callback
     def _async_input_changed(self, event: Event[EventStateChangedData]) -> None:
         """Schedule one serialized evaluation after an input state changes."""

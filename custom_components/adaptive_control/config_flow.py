@@ -34,6 +34,9 @@ from .const import (
     CONF_VACANT_SCENE_ENTITY_ID,
     DEFAULT_ILLUMINANCE_THRESHOLD,
     DOMAIN,
+    ILLUMINANCE_THRESHOLD_STEP,
+    MAX_ILLUMINANCE_THRESHOLD,
+    MIN_ILLUMINANCE_THRESHOLD,
     TYPE_PRESENCE_LIGHTING,
 )
 from .models import EntryKind
@@ -154,9 +157,9 @@ class AdaptiveControlConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 DEFAULT_ILLUMINANCE_THRESHOLD,
             ): NumberSelector(
                 NumberSelectorConfig(
-                    min=0,
-                    max=2000,
-                    step=5,
+                    min=MIN_ILLUMINANCE_THRESHOLD,
+                    max=MAX_ILLUMINANCE_THRESHOLD,
+                    step=ILLUMINANCE_THRESHOLD_STEP,
                     unit_of_measurement="lx",
                     mode=NumberSelectorMode.BOX,
                 )

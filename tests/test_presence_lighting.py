@@ -133,6 +133,38 @@ async def test_snapshots_entry_lux_without_repeating_transition_actions(
     await runtime.async_stop()
 
 
+async def test_threshold_change_reclassifies_the_entry_illuminance_snapshot(
+    hass: HomeAssistant,
+) -> None:
+    """A live threshold change uses entry lux without reading light feedback."""
+    calls = register_services(hass)
+    hass.states.async_set(OCCUPANCY, STATE_ON)
+    hass.states.async_set(ILLUMINANCE, "80")
+    hass.states.async_set(NIGHT, "above_horizon")
+    hass.states.async_set(MAIN_LIGHT, STATE_OFF)
+    hass.states.async_set(DAY_SCENE, "unknown")
+    runtime = make_runtime(hass)
+    await runtime.async_start()
+    await runtime.async_set_enabled(True)
+
+    assert runtime.effective_profile is PresenceLightingProfile.OCCUPIED_DARK
+    assert calls == [
+        (Platform.SWITCH, SERVICE_TURN_ON, MAIN_LIGHT),
+        (Platform.SCENE, SERVICE_TURN_ON, DAY_SCENE),
+    ]
+
+    hass.states.async_set(ILLUMINANCE, "500")
+    await hass.async_block_till_done()
+    await runtime.async_set_illuminance_threshold(50)
+
+    assert runtime.effective_profile is PresenceLightingProfile.OCCUPIED_BRIGHT
+    assert calls[-1] == (Platform.SWITCH, SERVICE_TURN_OFF, MAIN_LIGHT)
+    assert calls.count((Platform.SCENE, SERVICE_TURN_ON, DAY_SCENE)) == 1
+    assert runtime.diagnostics()["entry_illuminance"] == 80
+    assert runtime.diagnostics()["illuminance_threshold"] == 50
+    await runtime.async_stop()
+
+
 async def test_night_profile_does_not_require_illuminance(
     hass: HomeAssistant,
 ) -> None:

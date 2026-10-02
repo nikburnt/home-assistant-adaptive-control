@@ -1,5 +1,7 @@
 """Integration setup tests for Adaptive Control."""
 
+from homeassistant.components.number import ATTR_VALUE, SERVICE_SET_VALUE
+from homeassistant.components.number import DOMAIN as NUMBER_DOMAIN
 from homeassistant.const import (
     ATTR_ENTITY_ID,
     CONF_NAME,
@@ -94,15 +96,33 @@ async def test_setup_exposes_and_restores_common_observability(
         for item in er.async_entries_for_config_entry(registry, entry.entry_id)
         if item.unique_id == f"{entry.entry_id}_decision"
     )
+    threshold_entry = next(
+        item
+        for item in er.async_entries_for_config_entry(registry, entry.entry_id)
+        if item.unique_id == f"{entry.entry_id}_illuminance_threshold"
+    )
     assert verbose_entry.device_id is not None
     assert enabled_entry.device_id == verbose_entry.device_id
     assert profile_entry.device_id == verbose_entry.device_id
     assert decision_entry.device_id == verbose_entry.device_id
+    assert threshold_entry.device_id == verbose_entry.device_id
     assert verbose_entry.entity_category is EntityCategory.CONFIG
+    assert threshold_entry.entity_category is EntityCategory.CONFIG
     assert hass.states.get(enabled_entry.entity_id).state == STATE_OFF
     assert hass.states.get(verbose_entry.entity_id).state == STATE_OFF
     assert hass.states.get(profile_entry.entity_id).state == "disabled"
+    assert float(hass.states.get(threshold_entry.entity_id).state) == 100
     assert not scene_calls
+
+    await hass.services.async_call(
+        NUMBER_DOMAIN,
+        SERVICE_SET_VALUE,
+        {ATTR_ENTITY_ID: threshold_entry.entity_id, ATTR_VALUE: 50},
+        blocking=True,
+    )
+    assert entry.runtime_data.illuminance_threshold == 50
+    assert entry.data[CONF_ILLUMINANCE_THRESHOLD] == 50
+    assert float(hass.states.get(threshold_entry.entity_id).state) == 50
 
     await hass.services.async_call(
         Platform.SWITCH,
@@ -149,4 +169,6 @@ async def test_setup_exposes_and_restores_common_observability(
     assert hass.states.get(enabled_entry.entity_id).state == STATE_ON
     assert hass.states.get(verbose_entry.entity_id).state == STATE_ON
     assert hass.states.get(profile_entry.entity_id).state == "vacant"
+    assert entry.runtime_data.illuminance_threshold == 50
+    assert float(hass.states.get(threshold_entry.entity_id).state) == 50
     assert await hass.config_entries.async_unload(entry.entry_id)

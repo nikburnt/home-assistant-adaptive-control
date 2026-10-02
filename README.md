@@ -14,6 +14,7 @@ The repository contains the shared runtime and the first Controller Type,
 - one bounded in-memory decision trace per config entry;
 - credentials-free config-entry diagnostics;
 - restorable per-entry **Enabled** and **Verbose logging** switches;
+- a live, persistent low-light threshold setting;
 - effective-profile and input-quality sensors;
 - a semantic decision event;
 - UI setup and reconfiguration for explicit entity bindings;
@@ -63,6 +64,8 @@ Add this repository to HACS as a custom integration repository, install
 
 Review the created logical device, then turn on **Enabled**. The controller does
 not issue actuator or scene commands before that switch is enabled.
+The low-light threshold remains available on the logical device and can be
+adjusted without reconfiguring or restarting the integration.
 
 ## Development
 
